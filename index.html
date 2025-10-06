@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interaktiver Projektplan: Unsere Gefühle</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chosen Palette: Sanfte Pastell-Regenbogenfarben -->
+    <!-- Chosen Palette: Corporate Design (Kita MayKäfer) & Emotion Colors -->
     <!-- Application Structure Plan: Die Anwendung bricht die lineare 15-Wochen-Struktur des Berichts auf und organisiert sie neu in einer thematischen, interaktiven Oberfläche. Das Herzstück ist der "Regenbogen der Gefühle", eine visuelle Navigation, die es dem Benutzer ermöglicht, direkt zu den Aktivitäten für eine bestimmte Emotion zu springen. Dies ist benutzerfreundlicher für Pädagogen, die möglicherweise nach spezifischen Themen suchen (z. B. "Umgang mit Wut"). Eine sekundäre, chronologische Zeitleiste bietet einen alternativen Zugriffsweg für diejenigen, die dem Plan linear folgen möchten. Diese duale Navigationsstruktur macht die Erkundung flexibel und aufgabenorientiert, anstatt den Benutzer zu zwingen, durch eine lange Liste zu scrollen. -->
     <!-- Visualization & Content Choices: Da der Bericht keine quantitativen Daten enthält, werden keine Diagrammbibliotheken wie Chart.js verwendet. Stattdessen sind die "Visualisierungen" die Informationsarchitektur selbst. 1. Projektziele: Dargestellt als klare Textblöcke zur Information. 2. Wochenplan: Umgewandelt in ein interaktives Dashboard. Die Kerninformationen (Emotionen, Aktionen) werden durch Klick auf thematische Schaltflächen (der "Regenbogen") oder auf eine Zeitleiste angezeigt. Diese Interaktion wird durch Vanilla JavaScript gesteuert, das den Inhalt in einem dafür vorgesehenen Bereich dynamisch aktualisiert. Diese Methode ist effektiver als eine statische Liste, um die Kernkonzepte des Plans zugänglich zu machen. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
@@ -19,20 +19,12 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }
-            50% { transform: translateY(0); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }
-        }
-
+        
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fad0c4, #a1c4fd, #c2e9fb, #c2e9fb, #ffdde1, #ffdde1);
+            background: linear-gradient(-45deg, #fbe2e3, #e3e7f9, #d4f1f4, #f0e6f6);
             background-size: 400% 400%;
-            animation: animate-gradient 15s ease infinite;
-        }
-
-        .scroll-down-arrow {
-            animation: bounce 1s infinite;
+            animation: animate-gradient 20s ease infinite;
         }
 
         .fade-in-on-scroll {
@@ -47,6 +39,14 @@
 
         .modal-content {
              animation: fadeInUp 0.4s ease-out forwards;
+        }
+        
+        #start-view {
+            transition: opacity 0.8s ease-out, visibility 0.8s;
+        }
+        #start-view.hidden {
+            opacity: 0;
+            visibility: hidden;
         }
 
         .emotion-card, .other-phase-card {
@@ -74,53 +74,56 @@
             transform: translateY(-4px) scale(1.02);
             font-weight: bold;
         }
+        #haiku-container {
+            transition: opacity 1s ease-in-out;
+        }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Kumbh+Sans:wght@700&display=swap" rel="stylesheet">
 </head>
-<body class="text-slate-800">
+<body class="text-gray-700">
 
-    <div id="start-page" class="min-h-screen flex flex-col justify-center items-center text-center p-4 relative">
-        <header>
-            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold text-slate-900" style="font-family: 'Kumbh Sans', sans-serif;">Projekt: Unsere Gefühle</h1>
-            <p class="mt-4 text-lg sm:text-xl md:text-2xl text-slate-600">Ein interaktiver Leitfaden zur emotionalen Entwicklung.</p>
+    <div id="start-view" class="fixed inset-0 flex flex-col justify-center items-center text-center p-4 bg-white/80 backdrop-blur-md z-50">
+        <header class="flex flex-col items-center">
+            <img src="https://i.postimg.cc/fLV3P61y/educcare-Logo-Maykaefer-bearbeitet-bearbeitet.png" alt="Logo Kita MayKäfer" class="w-auto h-24 mb-6">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-800" style="font-family: 'Kumbh Sans', sans-serif;">Projekt: Unsere Gefühle</h1>
+            <p class="mt-4 text-lg sm:text-xl md:text-2xl text-gray-600 max-w-2xl">Ein interaktiver Leitfaden zur emotionalen Entwicklung, passend zu unserem pädagogischen Konzept.</p>
+            <button id="explore-button" class="mt-8 bg-[#C70077] hover:bg-[#a10061] text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105">
+                Projekt erkunden
+            </button>
+            <div id="haiku-container" class="mt-8 text-gray-500 italic text-lg opacity-0 h-24"></div>
         </header>
-        <div class="absolute bottom-10">
-             <a href="#main-content" class="scroll-down-arrow">
-                <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </a>
-        </div>
     </div>
 
-    <div id="main-content" class="container mx-auto p-4 md:p-8">
+    <div id="main-content" class="container mx-auto p-4 md:p-8 opacity-0 transition-opacity duration-1000">
         <main>
             <section id="intro" class="mb-12 bg-white/60 p-6 rounded-2xl shadow-sm backdrop-blur-md fade-in-on-scroll">
-                <h2 class="text-2xl font-bold text-slate-700 mb-4">Projektidee & Ziele</h2>
-                <p class="mb-6 text-slate-700">In diesem Projekt entdecken Kinder die vielfältige Welt der Gefühle. Jedes Gefühl bekommt eine Farbe und wird durch Geschichten, kreative Angebote und Spiele greifbar gemacht. Kinder lernen, ihre eigenen Gefühle und die anderer besser wahrzunehmen, zu benennen und mit ihnen umzugehen.</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                    <div class="bg-white/70 p-3 rounded-lg text-slate-700"><strong>Emotionale Kompetenz:</strong> Eigene Gefühle erkennen & ausdrücken.</div>
-                    <div class="bg-white/70 p-3 rounded-lg text-slate-700"><strong>Empathie:</strong> Gefühle bei anderen wahrnehmen & verstehen.</div>
-                    <div class="bg-white/70 p-3 rounded-lg text-slate-700"><strong>Soziales Lernen:</strong> Strategien zur Konfliktlösung entwickeln.</div>
-                    <div class="bg-white/70 p-3 rounded-lg text-slate-700"><strong>Sprachförderung:</strong> Wortschatz im Bereich der Gefühle erweitern.</div>
-                    <div class="bg-white/70 p-3 rounded-lg text-slate-700"><strong>Selbstbewusstsein:</strong> Eigene Emotionen als wichtig anerkennen.</div>
-                    <div class="bg-white/70 p-3 rounded-lg text-slate-700"><strong>Körperwahrnehmung:</strong> Gefühle und Körper verbinden.</div>
+                <h2 class="text-2xl font-bold text-[#C70077] mb-4">Projektidee & Ziele</h2>
+                <p class="mb-6 text-gray-700">In diesem Projekt entdecken Kinder die vielfältige Welt der Gefühle. Jedes Gefühl bekommt eine Farbe und wird durch Geschichten, kreative Angebote und Spiele greifbar gemacht. Kinder lernen, ihre eigenen Gefühle und die anderer besser wahrzunehmen, zu benennen und mit ihnen umzugehen.</p>
+                <div id="goals-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                    <div class="bg-white/70 p-3 rounded-lg text-gray-700"><strong>Emotionale Kompetenz:</strong> Eigene Gefühle erkennen & ausdrücken.</div>
+                    <div class="bg-white/70 p-3 rounded-lg text-gray-700"><strong>Empathie:</strong> Gefühle bei anderen wahrnehmen & verstehen.</div>
+                    <div class="bg-white/70 p-3 rounded-lg text-gray-700"><strong>Soziales Lernen:</strong> Strategien zur Konfliktlös. entwickeln.</div>
+                    <div class="bg-white/70 p-3 rounded-lg text-gray-700"><strong>Sprachförderung:</strong> Wortschatz erweitern.</div>
+                    <div class="bg-white/70 p-3 rounded-lg text-gray-700"><strong>Selbstbewusstsein:</strong> Eigene Emotionen anerkennen.</div>
+                    <div class="bg-white/70 p-3 rounded-lg text-gray-700"><strong>Körperwahrnehmung:</strong> Gefühle und Körper verbinden.</div>
                 </div>
             </section>
 
              <section id="timeline-navigation" class="mb-12 fade-in-on-scroll">
-                 <h2 class="text-2xl font-bold text-slate-700 mb-4 text-center">Projekt-Zeitleiste</h2>
+                 <h2 class="text-2xl font-bold text-[#C70077] mb-4 text-center">Projekt-Zeitleiste</h2>
                 <div class="timeline-container relative w-full flex gap-3 overflow-x-auto pb-4">
                 </div>
             </section>
 
             <section id="interactive-explorer" class="mb-12 fade-in-on-scroll">
-                <h2 class="text-2xl font-bold text-slate-700 mb-2 text-center">Der Regenbogen der Gefühle</h2>
-                <p class="text-center text-slate-600 mb-6">Wählen Sie ein Gefühl aus, um mehr über das Erleben der Kinder zu erfahren.</p>
+                <h2 class="text-2xl font-bold text-[#C70077] mb-2 text-center">Der Regenbogen der Gefühle</h2>
+                <p class="text-center text-gray-600 mb-6">Wählen Sie ein Gefühl aus, um mehr über das Erleben der Kinder zu erfahren.</p>
                 <div id="emotion-selector" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
                 </div>
 
-                <h3 class="text-xl font-bold text-slate-700 mb-4 text-center border-t border-gray-200/80 pt-8 mt-8">Weitere Projektschritte</h3>
+                <h3 class="text-xl font-bold text-[#C70077] mb-4 text-center border-t border-gray-200/80 pt-8 mt-8">Weitere Projektschritte</h3>
                 <div id="other-phases-selector" class="flex flex-wrap justify-center gap-3">
                 </div>
             </section>
@@ -129,7 +132,7 @@
 
     <div id="detail-modal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="modal-content bg-white/80 rounded-2xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto relative p-6">
-            <button id="close-modal-button" class="absolute top-4 right-4 text-slate-500 hover:text-slate-800">
+            <button id="close-modal-button" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
             <div id="week-content-container"></div>
@@ -137,22 +140,29 @@
     </div>
 
     <script>
+        // CD Colors from Logo
+        const ci = {
+            magenta: '#C70077',
+            ochre: '#E6B400', 
+            grey: '#808080'
+        };
+
         const projectData = [
-            { id: 1, woche: "1", titel: "Einführung", farbe: "text-slate-600", bgColor: "bg-slate-100", borderColor: "border-slate-300", impuls: "Wir lesen ein Bilderbuch (z.B. 'Das Farbenmonster') und sprechen darüber, dass Gefühle ganz normal sind und jeder sie hat.", aktion: "Jedes Kind bemalt ein 'Gefühlsgesicht' auf einen Pappteller, so wie es sich gerade fühlt." },
-            { id: 2, woche: "2", titel: "Freude", farbe: "text-amber-600", bgColor: "bg-amber-100", borderColor: "border-amber-300", previewText: "Körperlich, laut und übersprudelnd. Zeigt sich durch Lachen, Springen und Rufe.", impuls: "Freude ist für Kinder oft ein sehr körperliches, übersprudelndes Gefühl. Sie zeigen es durch Lachen, Springen und laute Rufe. Auslöser sind oft spielerische Erfolge, Wiederholungen (z.B. Kitzelspiele) oder die Anwesenheit von geliebten Personen.", aktion: "Raum für freie, laute Bewegung geben, Erfolge feiern und positive Momente sprachlich begleiten." },
-            { id: 3, woche: "3", titel: "Traurigkeit", farbe: "text-sky-600", bgColor: "bg-sky-100", borderColor: "border-sky-300", previewText: "Unmittelbar und überwältigend. Zeigt sich durch Weinen, Rückzug und Anhänglichkeit.", impuls: "Kinder erleben Traurigkeit sehr unmittelbar und oft überwältigend. Sie können das Gefühl noch nicht gut einordnen oder zeitlich begrenzen. Es äußert sich durch Weinen, Rückzug oder Anhänglichkeit. Körperliche Nähe und Trost sind essenziell.", aktion: "Gefühle anerkennen, Trost spenden und sichere Rückzugsorte (z.B. Kuschelecke) anbieten." },
-            { id: 4, woche: "4", titel: "Wut", farbe: "text-rose-600", bgColor: "bg-rose-100", borderColor: "border-rose-300", previewText: "Starke, körperliche Kraft. Entsteht aus Frustration und zeigt sich durch Stampfen oder Schreien.", impuls: "Wut ist für Kinder eine starke körperliche Kraft, die sie oft überrollt. Sie entsteht häufig aus Frustration (etwas klappt nicht) oder dem Gefühl der Ohnmacht. Typische Reaktionen sind Stampfen, Schreien oder Schlagen, da die Impulskontrolle noch reift.", aktion: "Gefühl benennen ('Du bist wütend!'), sichere Wege zum Abreagieren bieten (Kissen, stampfen) und Grenzen setzen." },
-            { id: 5, woche: "5", titel: "Angst", farbe: "text-gray-500", bgColor: "bg-gray-100", borderColor: "border-gray-300", previewText: "Oft 'magisch' geprägt (Monster, Dunkelheit). Zeigt sich durch Anklammern und Weinen.", impuls: "Im Kindergartenalter sind Ängste oft 'magisch' geprägt (Monster, Dunkelheit). Kinder können Fantasie und Realität noch nicht klar trennen. Angst zeigt sich durch Anklammern, Weinen oder Vermeiden. Sie brauchen die Sicherheit eines Erwachsenen.", aktion: "Ängste ernst nehmen (nicht ausreden), Schutz und Sicherheit vermitteln, gemeinsam 'Mut-Strategien' entwickeln." },
-            { id: 6, woche: "6", titel: "Überraschung", farbe: "text-violet-600", bgColor: "bg-violet-100", borderColor: "border-violet-300", previewText: "Kurzes, intensives Gefühl, das die Aufmerksamkeit schärft. Große Augen, offener Mund.", impuls: "Überraschung ist ein kurzes, intensives Gefühl, das die Aufmerksamkeit schärft. Kinder zeigen es oft mit großen Augen und offenem Mund. Ob die Überraschung positiv (Geschenk) oder negativ (lautes Geräusch) ist, entscheidet sich in Sekunden.", aktion: "Unerwartete, positive Momente im Alltag schaffen und die Reaktion des Kindes spiegeln." },
-            { id: 7, woche: "7", titel: "Gefühle erkennen", farbe: "text-teal-600", bgColor: "bg-teal-100", borderColor: "border-teal-300", impuls: "Wir schauen uns Gefühlskarten an und ahmen die Gesichtsausdrücke nach.", aktion: "Wir spielen das Spiegel-Spiel (zwei Kinder stehen sich gegenüber, einer macht eine Mimik vor, der andere ahmt sie nach)." },
-            { id: 8, woche: "8", titel: "Stolz & Mut", farbe: "text-orange-500", bgColor: "bg-orange-100", borderColor: "border-orange-300", previewText: "Zentral für das Selbstwertgefühl. Zeigt sich durch Strahlen und den Wunsch, Leistung zu präsentieren.", impuls: "Stolz ist ein zentrales Gefühl für den Aufbau des Selbstwertgefühls. Kinder erleben es, wenn sie etwas selbstständig geschafft haben. Sie zeigen es durch eine aufrechte Körperhaltung, Strahlen und den Wunsch, ihre Leistung zu präsentieren ('Schau mal!').", aktion: "Selbstständigkeit fördern, ehrliches und spezifisches Lob aussprechen und Gelegenheiten zum Zeigen schaffen." },
-            { id: 9, woche: "9", titel: "Neugier", farbe: "text-lime-600", bgColor: "bg-lime-100", borderColor: "border-lime-300", previewText: "Der 'Motor' des Lernens. Ein innerer Antrieb zum Anfassen, Untersuchen und Fragen.", impuls: "Neugier ist der 'Motor' des Lernens. Kinder in diesem Alter sind von Natur aus Entdecker. Sie erleben Neugier als starken inneren Antrieb, Dinge anzufassen, zu untersuchen und Fragen zu stellen ('Warum?'). Sie ist von Offenheit und nicht von Angst geprägt.", aktion: "Eine anregende Umgebung schaffen, Fragen der Kinder aufgreifen und gemeinsames Forschen ermöglichen." },
-            { id: 10, woche: "10", titel: "Helfen & Trösten", farbe: "text-cyan-600", bgColor: "bg-cyan-100", borderColor: "border-cyan-300", impuls: "Rollenspiel mit Handpuppen: Eine Puppe ist hingefallen und weint. Was können wir tun?", aktion: "Wir üben das Trösten und malen Bilder für jemanden, dem wir eine Freude machen wollen." },
-            { id: 11, woche: "11", titel: "Schüchternheit", farbe: "text-pink-500", bgColor: "bg-pink-100", borderColor: "border-pink-300", previewText: "Reaktion auf neue soziale Situationen. Zeigt sich durch Rückzug und leises Sprechen.", impuls: "Schüchternheit ist oft eine Reaktion auf neue soziale Situationen. Kinder fühlen sich unsicher und beobachtend. Sie zeigen dies durch körperlichen Rückzug, leises Sprechen oder Verstecken hinter einer Bezugsperson. Es ist ein Temperamentsmerkmal, keine 'Schwäche'.", aktion: "Dem Kind Zeit zum Ankommen geben, keinen Druck ausüben und kleine, sichere Schritte in die Gruppe unterstützen." },
-            { id: 12, woche: "12", titel: "Körper & Gefühl", farbe: "text-indigo-500", bgColor: "bg-indigo-100", borderColor: "border-indigo-300", impuls: "Wo spürst du die Freude? (z.B. Kribbeln im Bauch). Wo spürst du die Wut? (z.B. geballte Fäuste).", aktion: "Wir malen unsere Körperumrisse auf große Papierbögen und malen mit den passenden Farben ein, wo wir welches Gefühl spüren." },
-            { id: 13, woche: "13", titel: "Gefühle in Musik", farbe: "text-fuchsia-600", bgColor: "bg-fuchsia-100", borderColor: "border-fuchsia-300", impuls: "Wir hören uns gemeinsam verschiedene Lieder an (ein fröhliches, ein trauriges). Welches Gefühl löst die Melodie in uns aus?", aktion: "Wir raten, ob die Musik fröhlich oder traurig ist. Danach schauen wir uns den Text (oder eine kindgerechte Zusammenfassung) an und überprüfen, ob unser Gefühl zur Geschichte des Liedes passt." },
-            { id: 14, woche: "14", titel: "Vorbereitung", farbe: "text-green-500", bgColor: "bg-green-100", borderColor: "border-green-300", impuls: "Wir erinnern uns an alle Gefühle und ihre Farben, die wir kennengelernt haben.", aktion: "Wir malen gemeinsam ein riesiges Regenbogen-Wandbild als zentrales Ausstellungsstück und bereiten unsere gebastelten Werke für die Präsentation vor." },
-            { id: 15, woche: "15", titel: "Abschluss", farbe: "text-purple-600", bgColor: "bg-purple-100", borderColor: "border-purple-300", impuls: "Wir veranstalten eine kleine 'Vernissage' und präsentieren stolz unsere Kunstwerke aus dem Projekt (Bilder, Basteleien, den 'Turm des Stolzes' etc.).", aktion: "Jedes Kind darf sein Lieblingswerk vorstellen. Zum Abschluss erhält jedes Kind in einer feierlichen Runde seine 'Gefühls-Experten-Urkunde'." }
+            { id: 1, woche: "1", titel: "Einführung", farbe: 'text-gray-600', bgColor: 'bg-gray-100', borderColor: 'border-gray-400', impuls: "Wir lesen ein Bilderbuch (z.B. 'Das Farbenmonster') und sprechen darüber, dass Gefühle ganz normal sind und jeder sie hat.", aktion: "Jedes Kind bemalt ein 'Gefühlsgesicht' auf einen Pappteller, so wie es sich gerade fühlt." },
+            { id: 2, woche: "2", titel: "Freude", farbe: 'text-yellow-600', bgColor: 'bg-yellow-100', borderColor: 'border-yellow-400', previewText: "Körperlich, laut und übersprudelnd. Zeigt sich durch Lachen, Springen und Rufe.", impuls: "Freude ist für Kinder oft ein sehr körperliches, übersprudelndes Gefühl. Sie zeigen es durch Lachen, Springen und laute Rufe. Auslöser sind oft spielerische Erfolge oder die Anwesenheit von geliebten Personen.", aktion: "Raum für freie, laute Bewegung geben, Erfolge feiern und positive Momente sprachlich begleiten." },
+            { id: 3, woche: "3", titel: "Traurigkeit", farbe: 'text-blue-600', bgColor: 'bg-blue-100', borderColor: 'border-blue-400', previewText: "Unmittelbar und überwältigend. Zeigt sich durch Weinen, Rückzug und Anhänglichkeit.", impuls: "Kinder erleben Traurigkeit sehr unmittelbar und oft überwältigend. Sie können das Gefühl noch nicht gut einordnen. Es äußert sich durch Weinen, Rückzug oder Anhänglichkeit. Körperliche Nähe und Trost sind essenziell.", aktion: "Gefühle anerkennen, Trost spenden und sichere Rückzugsorte anbieten." },
+            { id: 4, woche: "4", titel: "Wut", farbe: 'text-red-600', bgColor: 'bg-red-100', borderColor: 'border-red-400', previewText: "Starke, körperliche Kraft. Entsteht aus Frustration und zeigt sich durch Stampfen oder Schreien.", impuls: "Wut ist für Kinder eine starke körperliche Kraft, die sie oft überrollt. Sie entsteht häufig aus Frustration oder dem Gefühl der Ohnmacht. Typische Reaktionen sind Stampfen, Schreien oder Schlagen, da die Impulskontrolle noch reift.", aktion: "Gefühl benennen ('Du bist wütend!'), sichere Wege zum Abreagieren bieten (Kissen, stampfen) und Grenzen setzen." },
+            { id: 5, woche: "5", titel: "Angst", farbe: 'text-gray-600', bgColor: 'bg-gray-100', borderColor: 'border-gray-400', previewText: "Oft 'magisch' geprägt (Monster, Dunkelheit). Zeigt sich durch Anklammern und Weinen.", impuls: "Im Kindergartenalter sind Ängste oft 'magisch' geprägt (Monster, Dunkelheit). Kinder können Fantasie und Realität noch nicht klar trennen. Angst zeigt sich durch Anklammern, Weinen oder Vermeiden. Sie brauchen die Sicherheit eines Erwachsenen.", aktion: "Ängste ernst nehmen, Schutz und Sicherheit vermitteln, gemeinsam 'Mut-Strategien' entwickeln." },
+            { id: 6, woche: "6", titel: "Überraschung", farbe: 'text-purple-600', bgColor: 'bg-purple-100', borderColor: 'border-purple-400', previewText: "Kurzes, intensives Gefühl, das die Aufmerksamkeit schärft. Große Augen, offener Mund.", impuls: "Überraschung ist ein kurzes, intensives Gefühl, das die Aufmerksamkeit schärft. Kinder zeigen es oft mit großen Augen und offenem Mund. Ob die Überraschung positiv oder negativ ist, entscheidet sich in Sekunden.", aktion: "Unerwartete, positive Momente im Alltag schaffen und die Reaktion des Kindes spiegeln." },
+            { id: 7, woche: "7", titel: "Gefühle erkennen", farbe: 'text-gray-600', bgColor: 'bg-gray-100', borderColor: 'border-gray-400', impuls: "Wir schauen uns Gefühlskarten an und ahmen die Gesichtsausdrücke nach.", aktion: "Wir spielen das Spiegel-Spiel." },
+            { id: 8, woche: "8", titel: "Stolz & Mut", farbe: 'text-orange-500', bgColor: 'bg-orange-100', borderColor: 'border-orange-400', previewText: "Zentral für das Selbstwertgefühl. Zeigt sich durch Strahlen und den Wunsch, Leistung zu präsentieren.", impuls: "Stolz ist ein zentrales Gefühl für den Aufbau des Selbstwertgefühls. Kinder erleben es, wenn sie etwas selbstständig geschafft haben. Sie zeigen es durch eine aufrechte Körperhaltung, Strahlen und den Wunsch, ihre Leistung zu präsentieren ('Schau mal!').", aktion: "Selbstständigkeit fördern, ehrliches und spezifisches Lob aussprechen und Gelegenheiten zum Zeigen schaffen." },
+            { id: 9, woche: "9", titel: "Neugier", farbe: 'text-green-600', bgColor: 'bg-green-100', borderColor: 'border-green-400', previewText: "Der 'Motor' des Lernens. Ein innerer Antrieb zum Anfassen, Untersuchen und Fragen.", impuls: "Neugier ist der 'Motor' des Lernens. Kinder in diesem Alter sind von Natur aus Entdecker. Sie erleben Neugier als starken inneren Antrieb, Dinge anzufassen, zu untersuchen und Fragen zu stellen ('Warum?').", aktion: "Eine anregende Umgebung schaffen, Fragen aufgreifen und gemeinsames Forschen ermöglichen." },
+            { id: 10, woche: "10", titel: "Helfen & Trösten", farbe: 'text-cyan-600', bgColor: 'bg-cyan-100', borderColor: 'border-cyan-400', impuls: "Rollenspiel mit Handpuppen: Eine Puppe ist hingefallen und weint. Was können wir tun?", aktion: "Wir üben das Trösten und malen Bilder für jemanden, dem wir eine Freude machen wollen." },
+            { id: 11, woche: "11", titel: "Schüchternheit", farbe: 'text-pink-500', bgColor: 'bg-pink-100', borderColor: 'border-pink-400', previewText: "Reaktion auf neue soziale Situationen. Zeigt sich durch Rückzug und leises Sprechen.", impuls: "Schüchternheit ist oft eine Reaktion auf neue soziale Situationen. Kinder fühlen sich unsicher und beobachtend. Sie zeigen dies durch körperlichen Rückzug, leises Sprechen oder Verstecken hinter einer Bezugsperson. Es ist ein Temperamentsmerkmal.", aktion: "Dem Kind Zeit zum Ankommen geben, keinen Druck ausüben und kleine, sichere Schritte in die Gruppe unterstützen." },
+            { id: 12, woche: "12", titel: "Körper & Gefühl", farbe: 'text-gray-600', bgColor: 'bg-gray-100', borderColor: 'border-gray-400', impuls: "Wo spürst du die Freude? Wo spürst du die Wut?", aktion: "Wir malen unsere Körperumrisse auf große Papierbögen und malen mit den passenden Farben ein, wo wir welches Gefühl spüren." },
+            { id: 13, woche: "13", titel: "Gefühle in Musik", farbe: 'text-indigo-600', bgColor: 'bg-indigo-100', borderColor: 'border-indigo-400', impuls: "Wir hören uns gemeinsam verschiedene Lieder an. Welches Gefühl löst die Melodie in uns aus?", aktion: "Wir raten, ob die Musik fröhlich oder traurig ist und überprüfen es dann am Text." },
+            { id: 14, woche: "14", titel: "Vorbereitung", farbe: 'text-lime-600', bgColor: 'bg-lime-100', borderColor: 'border-lime-400', impuls: "Wir erinnern uns an alle Gefühle und ihre Farben, die wir kennengelernt haben.", aktion: "Wir malen gemeinsam ein riesiges Regenbogen-Wandbild als zentrales Ausstellungsstück." },
+            { id: 15, woche: "15", titel: "Abschluss", farbe: 'text-amber-500', bgColor: 'bg-amber-100', borderColor: 'border-amber-400', impuls: "Wir veranstalten eine kleine Ausstellung und präsentieren stolz unsere Kunstwerke aus dem Projekt.", aktion: "Jedes Kind darf sein Lieblingswerk vorstellen und erhält eine 'Gefühls-Experten-Urkunde'." }
         ];
 
         const modal = document.getElementById('detail-modal');
@@ -161,6 +171,10 @@
         const otherPhasesSelector = document.getElementById('other-phases-selector');
         const contentContainer = document.getElementById('week-content-container');
         const timelineContainer = document.querySelector('.timeline-container');
+        const startView = document.getElementById('start-view');
+        const mainContent = document.getElementById('main-content');
+        const exploreButton = document.getElementById('explore-button');
+        const haikuContainer = document.getElementById('haiku-container');
 
         function openDetailModal(weekId) {
             const data = projectData.find(item => item.id === parseInt(weekId));
@@ -179,15 +193,15 @@
                     <h3 class="text-2xl md:text-3xl font-bold ${data.farbe} mb-1">Woche ${data.woche}: ${data.titel}</h3>
                     <div class="flex items-center space-x-4 mb-6">
                         <span class="w-4 h-4 ${data.bgColor} rounded-full"></span>
-                        <span class="text-slate-500">Thema dieser Woche</span>
+                        <span class="text-gray-500">Thema dieser Woche</span>
                     </div>
                     <div class="grid md:grid-cols-2 gap-6">
                         <div class="bg-white/50 p-4 rounded-lg">
-                            <h4 class="font-bold text-lg mb-2 text-slate-800">${impulsTitle}</h4>
+                            <h4 class="font-bold text-lg mb-2 text-gray-800">${impulsTitle}</h4>
                             <p>${data.impuls}</p>
                         </div>
                         <div class="bg-white/50 p-4 rounded-lg">
-                            <h4 class="font-bold text-lg mb-2 text-slate-800">${aktionTitle}</h4>
+                            <h4 class="font-bold text-lg mb-2 text-gray-800">${aktionTitle}</h4>
                             <p>${data.aktion}</p>
                         </div>
                     </div>
@@ -224,22 +238,22 @@
                     <div class="transition-transform duration-300 ease-in-out group-hover:-translate-y-3">
                         <span class="text-xl">${data.titel}</span>
                     </div>
-                    <div class="text-xs font-normal mt-2 px-2 opacity-0 max-h-0 group-hover:opacity-100 group-hover:max-h-full transition-all duration-300 ease-in-out text-slate-600">
+                    <div class="text-xs font-normal mt-2 px-2 opacity-0 max-h-0 group-hover:opacity-100 group-hover:max-h-full transition-all duration-300 ease-in-out text-gray-600">
                         <p>${data.previewText}</p>
                     </div>
                 </button>
             `).join('');
 
             otherPhasesSelector.innerHTML = otherPhases.map(data => `
-                <button data-week-id="${data.id}" class="week-selector-btn other-phase-card bg-white/70 hover:bg-white text-slate-700 py-2 px-4 rounded-lg text-center font-semibold cursor-pointer border border-gray-200/80">
+                <button data-week-id="${data.id}" class="week-selector-btn other-phase-card bg-white/70 hover:bg-white text-gray-700 py-2 px-4 rounded-lg text-center font-semibold cursor-pointer border border-gray-200/80">
                     <span>${data.titel}</span>
                 </button>
             `).join('');
             
             timelineContainer.innerHTML = projectData.map(data => `
                 <div data-week-id="${data.id}" class="timeline-item week-selector-btn cursor-pointer flex-shrink-0 w-28 text-center p-3 rounded-xl bg-white/60 backdrop-blur-sm shadow-sm">
-                     <div class="font-bold text-sm ${data.farbe}">Woche ${data.woche}</div>
-                     <div class="text-xs text-slate-600 mt-1">${data.titel}</div>
+                     <div class="font-bold text-sm" style="color: ${ci.grey}">${data.woche}</div>
+                     <div class="text-xs text-gray-600 mt-1">${data.titel}</div>
                 </div>
             `).join('');
 
@@ -254,16 +268,74 @@
                 }
             });
 
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('is-visible');
-                    }
-                });
-            }, { threshold: 0.1 });
+            exploreButton.addEventListener('click', () => {
+                startView.classList.add('hidden');
+                mainContent.classList.remove('opacity-0');
+                mainContent.style.paddingTop = '2rem'; 
 
-            document.querySelectorAll('.fade-in-on-scroll').forEach(el => {
-                observer.observe(el);
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                document.querySelectorAll('.fade-in-on-scroll').forEach(el => {
+                    observer.observe(el);
+                });
+            });
+
+            // Adjust Timeline text colors to CD
+            document.querySelectorAll('.timeline-item').forEach(item => {
+                const weekId = item.dataset.weekId;
+                const data = projectData.find(d => d.id == weekId);
+                const titleEl = item.querySelector('.font-bold');
+                if (data && titleEl) {
+                    if (data.titel === "Wut" || data.titel === "Schüchternheit") {
+                        titleEl.style.color = ci.magenta;
+                    } else if (data.titel === "Freude" || data.titel === "Stolz & Mut" || data.titel === "Abschluss") {
+                         titleEl.style.color = ci.ochre;
+                    } else {
+                         titleEl.style.color = ci.grey;
+                    }
+                }
+            });
+
+            // Haiku Cycle
+            const haikus = [
+                "Sonne lacht im Herz,<br>leichtes Kichern, bunter Tanz,<br>Glück im Augenblick.", // Freude
+                "Stiller Regen fällt,<br>schwere Tropfen auf der Haut,<br>bald scheint Licht hindurch.", // Traurigkeit
+                "Heißer Sturm im Bauch,<br>stampfender Fuß, lauter Schrei,<br>braucht nun sanften Wind.", // Wut
+                "Schatten an der Wand,<br>Herz klopft schnell, der Atem stockt,<br>sucht die sich're Hand.", // Angst
+                "Turm steht hoch und fest,<br>ich hab's geschafft, ganz allein,<br>Krone auf dem Haupt.", // Stolz
+                "Was ist dahinter?<br>Neue Welten, off'ne Tür,<br>Fragen ohne End'.", // Neugier
+                "Leises Flüstern nur,<br>rote Wangen, Blick gesenkt,<br>stiller Beobachter." // Schüchternheit
+            ];
+            let haikuIndex = 0;
+
+            function cycleHaikus() {
+                haikuContainer.classList.add('opacity-0'); 
+                setTimeout(() => {
+                    haikuIndex = (haikuIndex + 1) % haikus.length;
+                    haikuContainer.innerHTML = haikus[haikuIndex];
+                    haikuContainer.classList.remove('opacity-0'); 
+                }, 1000); 
+            }
+
+            setTimeout(() => {
+                haikuContainer.innerHTML = haikus[haikuIndex];
+                haikuContainer.classList.remove('opacity-0');
+                setInterval(cycleHaikus, 5000); 
+            }, 500);
+
+            // Adjust goals colors
+             document.querySelectorAll('#goals-grid strong').forEach((el, index) => {
+                if (index % 2 === 0) {
+                     el.style.color = ci.magenta;
+                } else {
+                     el.style.color = ci.ochre;
+                }
             });
         }
 
