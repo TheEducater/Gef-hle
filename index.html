@@ -147,7 +147,10 @@
         
         <!-- ############# Gefühle-Projekt ############# -->
         <div id="gefuehle-projekt" class="hidden">
-            <header class="text-center mb-10">
+            <header class="relative text-center mb-10 flex items-center justify-center">
+                 <button class="back-to-selection-btn absolute left-0 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 text-white rounded-full p-2 transition-colors">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                 </button>
                  <h1 class="text-4xl font-bold text-white text-shadow-md" style="font-family: 'Kumbh Sans', sans-serif;">Projekt: Unsere Gefühle</h1>
             </header>
             <main>
@@ -179,7 +182,10 @@
 
         <!-- ############# Stuttgart-Projekt ############# -->
         <div id="stuttgart-projekt" class="hidden">
-            <header class="text-center mb-10">
+            <header class="relative text-center mb-10 flex items-center justify-center">
+                 <button class="back-to-selection-btn absolute left-0 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 text-white rounded-full p-2 transition-colors">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                 </button>
                  <h1 class="text-4xl font-bold text-white text-shadow-md" style="font-family: 'Kumbh Sans', sans-serif;">Projekt: Meine Stadt Stuttgart</h1>
             </header>
             <main>
@@ -214,9 +220,6 @@
                 </section>
             </main>
         </div>
-        <footer class="text-center mt-12 py-4">
-            <button id="back-to-selection" class="bg-white/80 hover:bg-white text-gray-800 font-semibold py-2 px-6 rounded-full shadow-lg border border-gray-200/80 backdrop-blur-sm">Zurück zur Projektauswahl</button>
-        </footer>
     </div>
 
     <!-- Modalfenster für Details -->
@@ -406,13 +409,16 @@
             document.querySelectorAll('.fade-in-on-scroll').forEach(el => observer.observe(el));
         }
 
-        document.getElementById('back-to-selection').addEventListener('click', () => {
-            mainContent.classList.add('opacity-0');
-            setTimeout(() => {
-                startView.classList.remove('hidden');
-                document.body.className = 'text-gray-700';
-                showProject(currentProjectIndex);
-            }, 500);
+        const backToSelectionButtons = document.querySelectorAll('.back-to-selection-btn');
+        backToSelectionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                mainContent.classList.add('opacity-0');
+                setTimeout(() => {
+                    startView.classList.remove('hidden');
+                    document.body.className = 'text-gray-700';
+                    showProject(currentProjectIndex);
+                }, 500);
+            });
         });
 
         closeModalButton.addEventListener('click', closeDetailModal);
@@ -506,10 +512,6 @@
         
         showProject(currentProjectIndex);
     </script>
-</body>
-</html>
-
-
 </body>
 </html>
 
