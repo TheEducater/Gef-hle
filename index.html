@@ -3,12 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interaktiver Projektplan: Unsere Gefühle</title>
+    <title>Interaktive Projektpläne</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chosen Palette: Corporate Design (Kita MayKäfer) & Emotion Colors -->
-    <!-- Application Structure Plan: Die Anwendung bricht die lineare 15-Wochen-Struktur des Berichts auf und organisiert sie neu in einer thematischen, interaktiven Oberfläche. Das Herzstück ist der "Regenbogen der Gefühle", eine visuelle Navigation, die es dem Benutzer ermöglicht, direkt zu den Aktivitäten für eine bestimmte Emotion zu springen. Dies ist benutzerfreundlicher für Pädagogen, die möglicherweise nach spezifischen Themen suchen (z. B. "Umgang mit Wut"). Eine sekundäre, chronologische Zeitleiste bietet einen alternativen Zugriffsweg für diejenigen, die dem Plan linear folgen möchten. Diese duale Navigationsstruktur macht die Erkundung flexibel und aufgabenorientiert, anstatt den Benutzer zu zwingen, durch eine lange Liste zu scrollen. -->
-    <!-- Visualization & Content Choices: Da der Bericht keine quantitativen Daten enthält, werden keine Diagrammbibliotheken wie Chart.js verwendet. Stattdessen sind die "Visualisierungen" die Informationsarchitektur selbst. 1. Projektziele: Dargestellt als klare Textblöcke zur Information. 2. Wochenplan: Umgewandelt in ein interaktives Dashboard. Die Kerninformationen (Emotionen, Aktionen) werden durch Klick auf thematische Schaltflächen (der "Regenbogen") oder auf eine Zeitleiste angezeigt. Diese Interaktion wird durch Vanilla JavaScript gesteuert, das den Inhalt in einem dafür vorgesehenen Bereich dynamisch aktualisiert. Diese Methode ist effektiver als eine statische Liste, um die Kernkonzepte des Plans zugänglich zu machen. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         @keyframes animate-gradient {
             0% { background-position: 0% 50%; }
@@ -22,9 +18,21 @@
         
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(-45deg, #fbe2e3, #e3e7f9, #d4f1f4, #f0e6f6);
-            background-size: 400% 400%;
-            animation: animate-gradient 20s ease infinite;
+            transition: background 0.8s ease;
+        }
+
+        /* Theme for Gefühle-Projekt */
+        body.theme-gefuehle {
+            background: linear-gradient(-45deg, #c70077, #a21caf, #7e22ce);
+            background-size: 200% 200%;
+            animation: animate-gradient 15s ease infinite;
+        }
+
+        /* Theme for Stuttgart-Projekt */
+        body.theme-stuttgart {
+            background: linear-gradient(-45deg, #f59e0b, #fbbf24, #d97706);
+            background-size: 200% 200%;
+            animation: animate-gradient 15s ease infinite;
         }
 
         .fade-in-on-scroll {
@@ -42,41 +50,72 @@
         }
         
         #start-view {
-            transition: opacity 0.8s ease-out, visibility 0.8s;
+            transition: opacity 0.8s ease-out, visibility 0.8s, background 0.8s ease;
         }
         #start-view.hidden {
             opacity: 0;
             visibility: hidden;
+            pointer-events: none;
         }
 
-        .emotion-card, .other-phase-card {
+        .emotion-card, .other-phase-card, .stuttgart-card, .theme-card {
             transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
         }
-        .emotion-card:hover, .other-phase-card:hover {
+        .emotion-card:hover, .other-phase-card:hover, .stuttgart-card:hover, .theme-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
         }
-        .timeline-container::-webkit-scrollbar {
-            height: 8px;
+        .timeline-container::-webkit-scrollbar { height: 8px; }
+        .timeline-container::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.3); border-radius: 10px; }
+        .timeline-container::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
+        
+        .timeline-item { transition: all 0.3s ease-in-out; }
+        .timeline-item.active { transform: translateY(-4px) scale(1.02); font-weight: bold; }
+
+        /* Carousel Styles */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.15); opacity: 1; }
         }
-        .timeline-container::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
+        .arrow-pulse {
+            animation: pulse 2.5s ease-in-out infinite;
         }
-        .timeline-container::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
+        .carousel-content {
+            transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
         }
-        .timeline-item {
-            transition: all 0.3s ease-in-out;
+        .carousel-content.exit {
+            opacity: 0;
+            transform: translateY(10px);
         }
-        .timeline-item.active {
-            transform: translateY(-4px) scale(1.02);
-            font-weight: bold;
+        .carousel-content.enter {
+            opacity: 0;
+            transform: translateY(-10px);
         }
-        #haiku-container {
-            transition: opacity 1s ease-in-out;
+        #start-view.theme-gefuehle {
+             background: linear-gradient(-45deg, #c70077, #a21caf, #7e22ce);
+             background-size: 200% 200%;
+             animation: animate-gradient 15s ease infinite;
         }
+        #start-view.theme-stuttgart {
+            background: linear-gradient(-45deg, #f59e0b, #fbbf24, #d97706);
+            background-size: 200% 200%;
+            animation: animate-gradient 15s ease infinite;
+        }
+        .text-shadow-md {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+        }
+       
+        .theme-card.active {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1), 0 6px 8px -6px rgba(0, 0, 0, 0.05);
+            border-color: #fbbf24;
+            background-color: #fef3c7;
+        }
+        #carousel-dynamic-text {
+            transition: opacity 0.7s ease-in-out;
+            min-height: 5rem; /* Prevents layout shifts */
+        }
+
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
@@ -84,52 +123,103 @@
 </head>
 <body class="text-gray-700">
 
-    <div id="start-view" class="fixed inset-0 flex flex-col justify-center items-center text-center p-4 bg-white/80 backdrop-blur-md z-50">
-        <header class="flex flex-col items-center">
-            <img src="https://i.postimg.cc/fLV3P61y/educcare-Logo-Maykaefer-bearbeitet-bearbeitet.png" alt="Logo Kita MayKäfer" class="w-auto h-24 mb-6">
-            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-800" style="font-family: 'Kumbh Sans', sans-serif;">Projekt: Unsere Gefühle</h1>
-            <p class="mt-4 text-lg sm:text-xl md:text-2xl text-gray-600 max-w-2xl">Ein interaktiver Leitfaden zur emotionalen Entwicklung, passend zu unserem pädagogischen Konzept.</p>
-            <button id="explore-button" class="mt-8 bg-[#C70077] hover:bg-[#a10061] text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105">
-                Projekt erkunden
+    <!-- Startansicht zur Projektauswahl -->
+    <div id="start-view" class="fixed inset-0 flex flex-col justify-center items-center text-center p-4 z-50">
+        <div class="w-full max-w-5xl mx-auto flex items-center justify-between">
+            <button id="prev-project" class="arrow-pulse flex-shrink-0 p-2 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-colors">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
             </button>
-            <div id="haiku-container" class="mt-8 text-gray-500 italic text-lg opacity-0 h-24"></div>
-        </header>
+            <div class="flex-grow mx-4 text-white">
+                <img src="https://i.postimg.cc/fLV3P61y/educcare-Logo-Maykaefer-bearbeitet-bearbeitet.png" alt="Logo Kita MayKäfer" class="w-auto h-20 mb-6 mx-auto">
+                <div id="carousel-content-container" class="carousel-content"></div>
+                 <button id="explore-button" class="mt-8 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all transform hover:scale-105 duration-300">
+                    Projekt erkunden
+                </button>
+            </div>
+            <button id="next-project" class="arrow-pulse flex-shrink-0 p-2 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-colors">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+        </div>
     </div>
 
+    <!-- Hauptinhalt für die Projekte -->
     <div id="main-content" class="container mx-auto p-4 md:p-8 opacity-0 transition-opacity duration-1000">
-        <main>
-            <section id="intro" class="mb-12 bg-white/60 p-6 rounded-2xl shadow-sm backdrop-blur-md fade-in-on-scroll">
-                <h2 class="text-2xl font-bold text-[#C70077] mb-4">Projektidee & Ziele</h2>
-                <p class="mb-6 text-gray-700">In diesem Projekt entdecken Kinder die vielfältige Welt der Gefühle. Jedes Gefühl bekommt eine Farbe und wird durch Geschichten, kreative Angebote und Spiele greifbar gemacht. Kinder lernen, ihre eigenen Gefühle und die anderer besser wahrzunehmen, zu benennen und mit ihnen umzugehen.</p>
-                <div id="goals-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                    <div class="bg-white/70 p-3 rounded-lg text-gray-700"><strong>Emotionale Kompetenz:</strong> Eigene Gefühle erkennen & ausdrücken.</div>
-                    <div class="bg-white/70 p-3 rounded-lg text-gray-700"><strong>Empathie:</strong> Gefühle bei anderen wahrnehmen & verstehen.</div>
-                    <div class="bg-white/70 p-3 rounded-lg text-gray-700"><strong>Soziales Lernen:</strong> Strategien zur Konfliktlös. entwickeln.</div>
-                    <div class="bg-white/70 p-3 rounded-lg text-gray-700"><strong>Sprachförderung:</strong> Wortschatz erweitern.</div>
-                    <div class="bg-white/70 p-3 rounded-lg text-gray-700"><strong>Selbstbewusstsein:</strong> Eigene Emotionen anerkennen.</div>
-                    <div class="bg-white/70 p-3 rounded-lg text-gray-700"><strong>Körperwahrnehmung:</strong> Gefühle und Körper verbinden.</div>
-                </div>
-            </section>
+        
+        <!-- ############# Gefühle-Projekt ############# -->
+        <div id="gefuehle-projekt" class="hidden">
+            <header class="text-center mb-10">
+                 <h1 class="text-4xl font-bold text-white text-shadow-md" style="font-family: 'Kumbh Sans', sans-serif;">Projekt: Unsere Gefühle</h1>
+            </header>
+            <main>
+                <section class="mb-12 bg-white/60 p-6 rounded-2xl shadow-sm backdrop-blur-md fade-in-on-scroll">
+                    <h2 class="text-2xl font-bold text-[#C70077] mb-4">Projektidee & Ziele</h2>
+                    <p class="mb-6 text-gray-700">In diesem Projekt entdecken Kinder die vielfältige Welt der Gefühle. Jedes Gefühl bekommt eine Farbe und wird durch Geschichten, kreative Angebote und Spiele greifbar gemacht.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                        <div class="bg-white/70 p-3 rounded-lg"><strong class="text-[#C70077]">Emotionale Kompetenz:</strong> Eigene Gefühle erkennen & ausdrücken.</div>
+                        <div class="bg-white/70 p-3 rounded-lg"><strong class="text-[#E6B400]">Empathie:</strong> Gefühle bei anderen wahrnehmen & verstehen.</div>
+                        <div class="bg-white/70 p-3 rounded-lg"><strong class="text-[#C70077]">Soziales Lernen:</strong> Strategien zur Konfliktlös. entwickeln.</div>
+                        <div class="bg-white/70 p-3 rounded-lg"><strong class="text-[#E6B400]">Sprachförderung:</strong> Wortschatz erweitern.</div>
+                        <div class="bg-white/70 p-3 rounded-lg"><strong class="text-[#C70077]">Selbstbewusstsein:</strong> Eigene Emotionen anerkennen.</div>
+                        <div class="bg-white/70 p-3 rounded-lg"><strong class="text-[#E6B400]">Körperwahrnehmung:</strong> Gefühle und Körper verbinden.</div>
+                    </div>
+                </section>
+                <section class="mb-12 fade-in-on-scroll">
+                    <h2 class="text-2xl font-bold text-white text-shadow-md mb-4 text-center">Projekt-Zeitleiste</h2>
+                    <div class="timeline-container relative w-full flex gap-3 overflow-x-auto pb-4"></div>
+                </section>
+                <section class="mb-12 fade-in-on-scroll">
+                    <h2 class="text-2xl font-bold text-white text-shadow-md mb-2 text-center">Der Regenbogen der Gefühle</h2>
+                    <p class="text-center text-gray-200 mb-6">Wählen Sie ein Gefühl aus, um mehr zu erfahren.</p>
+                    <div id="emotion-selector" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8"></div>
+                    <h3 class="text-xl font-bold text-white text-shadow-md mb-4 text-center border-t border-gray-200/50 pt-8 mt-8">Weitere Projektschritte</h3>
+                    <div id="other-phases-selector" class="flex flex-wrap justify-center gap-3"></div>
+                </section>
+            </main>
+        </div>
 
-             <section id="timeline-navigation" class="mb-12 fade-in-on-scroll">
-                 <h2 class="text-2xl font-bold text-[#C70077] mb-4 text-center">Projekt-Zeitleiste</h2>
-                <div class="timeline-container relative w-full flex gap-3 overflow-x-auto pb-4">
-                </div>
-            </section>
+        <!-- ############# Stuttgart-Projekt ############# -->
+        <div id="stuttgart-projekt" class="hidden">
+            <header class="text-center mb-10">
+                 <h1 class="text-4xl font-bold text-white text-shadow-md" style="font-family: 'Kumbh Sans', sans-serif;">Projekt: Meine Stadt Stuttgart</h1>
+            </header>
+            <main>
+                <section class="mb-12 bg-white/60 p-6 rounded-2xl shadow-sm backdrop-blur-md fade-in-on-scroll">
+                    <h2 class="text-2xl font-bold text-yellow-500 mb-4">Projektidee: Die Stadt verstehen</h2>
+                    <p class="mb-6 text-gray-700">Stuttgart mit Kinderaugen neu entdecken! Statt nur einzelne Ziele anzusteuern, wollen wir die Struktur der Stadt verstehen. Wie hängen die Stadtteile zusammen? Wie kommt man mit Bus und Bahn von A nach B? Wir werden zu Stadtforschern, die auf einer großen Karte ihre Wege nachzeichnen und so ein Gefühl für Entfernungen und Richtungen entwickeln. Das Projekt soll Identifikation schaffen: "Das ist meine Stadt, hier kenne ich mich aus!"</p>
+                </section>
 
-            <section id="interactive-explorer" class="mb-12 fade-in-on-scroll">
-                <h2 class="text-2xl font-bold text-[#C70077] mb-2 text-center">Der Regenbogen der Gefühle</h2>
-                <p class="text-center text-gray-600 mb-6">Wählen Sie ein Gefühl aus, um mehr über das Erleben der Kinder zu erfahren.</p>
-                <div id="emotion-selector" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
-                </div>
+                <section class="mb-12 fade-in-on-scroll">
+                    <h2 class="text-2xl font-bold text-white text-shadow-md mb-2 text-center">Forschungs-Schwerpunkte</h2>
+                    <p class="text-center text-gray-200 mb-6">Wählen Sie einen Schwerpunkt aus, um passende Aktionsideen zu sehen.</p>
+                    <div id="stuttgart-themen-selector" class="flex flex-wrap justify-center gap-4 mb-8"></div>
+                </section>
 
-                <h3 class="text-xl font-bold text-[#C70077] mb-4 text-center border-t border-gray-200/80 pt-8 mt-8">Weitere Projektschritte</h3>
-                <div id="other-phases-selector" class="flex flex-wrap justify-center gap-3">
-                </div>
-            </section>
-        </main>
+                <section class="mb-12 fade-in-on-scroll">
+                    <h2 class="text-2xl font-bold text-white text-shadow-md mb-4 text-center">Unsere Forschungs-Missionen</h2>
+                    <div id="stuttgart-orte-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <!-- Location cards will be injected here by JavaScript -->
+                    </div>
+                </section>
+                
+                <section class="mb-12 bg-white/60 p-6 rounded-2xl shadow-sm backdrop-blur-md fade-in-on-scroll">
+                    <h2 class="text-2xl font-bold text-yellow-500 mb-4">Ziele unserer Stadterkundung</h2>
+                     <p class="mb-6 text-gray-700">Durch unsere Erkundungen möchten wir den Kindern folgende Kompetenzen vermitteln:</p>
+                    <ul id="stuttgart-ziele-liste" class="list-disc list-inside space-y-2 text-gray-800">
+                       <li><strong>Räumliches Verständnis:</strong> Die Kinder entwickeln eine mentale Karte von Stuttgart, verstehen Himmelsrichtungen und lernen, Entfernungen abzuschätzen.</li>
+                       <li><strong>Orientierung im öffentlichen Raum:</strong> Sie lernen, sich an Haltestellen zu orientieren, Linienpläne zu lesen und Durchsagen zu verstehen.</li>
+                       <li><strong>Verkehrskompetenz:</strong> Die Kinder üben sicheres Verhalten im Straßenverkehr und in öffentlichen Verkehrsmitteln.</li>
+                       <li><strong>Soziale Interaktion:</strong> Sie lernen, als Gruppe unterwegs zu sein, aufeinander achtzugeben und mit unerwarteten Situationen umzugehen.</li>
+                       <li><strong>Identifikation mit der Heimatstadt:</strong> Die Kinder bauen eine persönliche Beziehung zu Stuttgart auf und fühlen sich als Teil der Stadtgemeinschaft.</li>
+                    </ul>
+                </section>
+            </main>
+        </div>
+        <footer class="text-center mt-12 py-4">
+            <button id="back-to-selection" class="bg-white/80 hover:bg-white text-gray-800 font-semibold py-2 px-6 rounded-full shadow-lg border border-gray-200/80 backdrop-blur-sm">Zurück zur Projektauswahl</button>
+        </footer>
     </div>
 
+    <!-- Modalfenster für Details -->
     <div id="detail-modal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="modal-content bg-white/80 rounded-2xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto relative p-6">
             <button id="close-modal-button" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
@@ -140,14 +230,7 @@
     </div>
 
     <script>
-        // CD Colors from Logo
-        const ci = {
-            magenta: '#C70077',
-            ochre: '#E6B400', 
-            grey: '#808080'
-        };
-
-        const projectData = [
+        const projectDataGefuehle = [
             { id: 1, woche: "1", titel: "Einführung", farbe: 'text-gray-600', bgColor: 'bg-gray-100', borderColor: 'border-gray-400', impuls: "Wir lesen ein Bilderbuch (z.B. 'Das Farbenmonster') und sprechen darüber, dass Gefühle ganz normal sind und jeder sie hat.", aktion: "Jedes Kind bemalt ein 'Gefühlsgesicht' auf einen Pappteller, so wie es sich gerade fühlt." },
             { id: 2, woche: "2", titel: "Freude", farbe: 'text-yellow-600', bgColor: 'bg-yellow-100', borderColor: 'border-yellow-400', previewText: "Körperlich, laut und übersprudelnd. Zeigt sich durch Lachen, Springen und Rufe.", impuls: "Freude ist für Kinder oft ein sehr körperliches, übersprudelndes Gefühl. Sie zeigen es durch Lachen, Springen und laute Rufe. Auslöser sind oft spielerische Erfolge oder die Anwesenheit von geliebten Personen.", aktion: "Raum für freie, laute Bewegung geben, Erfolge feiern und positive Momente sprachlich begleiten." },
             { id: 3, woche: "3", titel: "Traurigkeit", farbe: 'text-blue-600', bgColor: 'bg-blue-100', borderColor: 'border-blue-400', previewText: "Unmittelbar und überwältigend. Zeigt sich durch Weinen, Rückzug und Anhänglichkeit.", impuls: "Kinder erleben Traurigkeit sehr unmittelbar und oft überwältigend. Sie können das Gefühl noch nicht gut einordnen. Es äußert sich durch Weinen, Rückzug oder Anhänglichkeit. Körperliche Nähe und Trost sind essenziell.", aktion: "Gefühle anerkennen, Trost spenden und sichere Rückzugsorte anbieten." },
@@ -165,51 +248,59 @@
             { id: 15, woche: "15", titel: "Abschluss", farbe: 'text-amber-500', bgColor: 'bg-amber-100', borderColor: 'border-amber-400', impuls: "Wir veranstalten eine kleine Ausstellung und präsentieren stolz unsere Kunstwerke aus dem Projekt.", aktion: "Jedes Kind darf sein Lieblingswerk vorstellen und erhält eine 'Gefühls-Experten-Urkunde'." }
         ];
 
+        const stuttgartThemes = [
+            { id: 1, title: "Stadtteile & Viertel", category: "Orientierung", icon: `<svg class="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 16.382V5.618a1 1 0 00-.553-.894L15 2m-6 5l6-3m-6 9l6-3"></path></svg>`, info: "Wo wohnen wir und wie sehen andere Viertel aus?", details: "<strong>Impuls:</strong> Wir schauen auf eine große Stuttgart-Karte. Jedes Kind zeigt, wo es wohnt. Welche Farben haben die Stadtteile? <strong>Aktionen:</strong> Ein Spaziergang durch unser eigenes Viertel: Was gibt es hier alles? (Spielplatz, Bäcker, etc.). Wir besuchen den Wochenmarkt in einem anderen Stadtteil und vergleichen ihn mit unserem." },
+            { id: 2, title: "Unterwegs mit Bus & Bahn", category: "Verkehrsnetz", icon: `<svg class="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>`, info: "Wir erkunden Stuttgart aus dem Fenster der U-Bahn.", details: "<strong>Impuls:</strong> Wir schauen uns einen Liniennetzplan an. Welche Farben haben die Linien? Wohin fahren sie? <strong>Aktionen:</strong> Wir fahren eine Runde mit der Ring-S-Bahn und beobachten, wie sich die Landschaft verändert. Wir machen eine Fahrt mit der 'Zacke' und verstehen, wie eine Zahnradbahn funktioniert." },
+            { id: 3, title: "Hoch hinaus!", category: "Aussicht", icon: `<svg class="w-12 h-12 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>`, info: "Wir betrachten die Stadt von oben und bekommen den Überblick.", details: "<strong>Impuls:</strong> Wie sieht eine Stadt für einen Vogel aus? <strong>Aktionen:</strong> Besuch des Fernsehturms, um das große Ganze zu sehen. Wir besteigen den Killesbergturm und vergleichen die Aussicht. Wir suchen auf unserer Karte die Orte, die wir von oben erkennen." },
+            { id: 4, title: "Kultur & Geschichte", category: "Kultur", icon: `<svg class="w-12 h-12 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>`, info: "Wir entdecken alte Gebäude und spannende Geschichten.", details: "<strong>Impuls:</strong> Wir schauen uns das Stuttgarter Rössle an. Wo in der Stadt können wir es finden? <strong>Aktionen:</strong> Ein Spaziergang durch die Markthalle mit all ihren Gerüchen und Farben. Wir besuchen das Landesmuseum im Alten Schloss und schauen uns die Ritterrüstungen an." },
+            { id: 5, title: "Natur in der Stadt", category: "Natur", icon: `<svg class="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>`, info: "Wo gibt es in Stuttgart grüne Oasen zum Spielen und Entdecken?", details: "<strong>Impuls:</strong> Welche Tiere leben mitten in der Stadt? Wir sammeln Ideen. <strong>Aktionen:</strong> Wir besuchen den Höhenpark Killesberg, schauen uns die Tiere an und fahren mit der Parkeisenbahn. Wir machen ein Picknick im Rosensteinpark und halten Ausschau nach seltenen Bäumen und Vögeln." },
+            { id: 6, title: "Rund um Stuttgart", category: "Orientierung", icon: `<svg class="w-12 h-12 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9V3m0 18a9 9 0 009-9M3 12a9 9 0 019-9m-9 9a9 9 0 009 9m-9-9h18"></path></svg>`, info: "Wir entdecken die Umgebung: Schwäbische Alb, Neckartal & mehr.", details: "<strong>Impuls:</strong> Woher kommt unser Wasser und wohin fließt der Neckar? Wir schauen uns eine große Karte von Baden-Württemberg an, die über Stuttgart hinausgeht. <strong>Aktionen:</strong> Ein Ausflug an den Max-Eyth-See, um den Neckar aus der Nähe zu erleben und Schiffe zu beobachten. Wir planen eine kleine Wanderung auf der Schwäbischen Alb (z.B. am Albtrauf), um die Natur außerhalb der Stadt zu entdecken und den Weitblick zu genießen." }
+        ];
+
+        // Globale DOM-Elemente
         const modal = document.getElementById('detail-modal');
         const closeModalButton = document.getElementById('close-modal-button');
-        const emotionSelector = document.getElementById('emotion-selector');
-        const otherPhasesSelector = document.getElementById('other-phases-selector');
         const contentContainer = document.getElementById('week-content-container');
-        const timelineContainer = document.querySelector('.timeline-container');
         const startView = document.getElementById('start-view');
         const mainContent = document.getElementById('main-content');
-        const exploreButton = document.getElementById('explore-button');
-        const haikuContainer = document.getElementById('haiku-container');
 
-        function openDetailModal(weekId) {
-            const data = projectData.find(item => item.id === parseInt(weekId));
+        function openDetailModal(dataId, projectType) {
+            const data = (projectType === 'gefuehle') 
+                ? projectDataGefuehle.find(item => item.id === parseInt(dataId))
+                : stuttgartThemes.find(item => item.id === parseInt(dataId));
+            
             if (!data) return;
 
-            let impulsTitle = "Impuls & Gesprächsanlass";
-            let aktionTitle = "Kreative Aktion";
-            const coreFeelingTitles = ["Freude", "Traurigkeit", "Wut", "Angst", "Überraschung", "Stolz & Mut", "Neugier", "Schüchternheit"];
-            if (coreFeelingTitles.includes(data.titel)) {
-                impulsTitle = "Wie Kinder dieses Gefühl erleben";
-                aktionTitle = "Pädagogische Anregungen";
+            let htmlContent = '';
+            if (projectType === 'stuttgart') {
+                htmlContent = `
+                    <div>
+                        <h3 class="text-2xl md:text-3xl font-bold text-yellow-600 mb-4">${data.title}</h3>
+                        <div class="prose max-w-none">${data.details}</div>
+                    </div>`;
+            } else {
+                 let impulsTitle = "Impuls & Gesprächsanlass";
+                 let aktionTitle = "Aktion & Ausflug";
+                 const coreFeelingTitles = ["Freude", "Traurigkeit", "Wut", "Angst", "Überraschung", "Stolz & Mut", "Neugier", "Schüchternheit"];
+                 if (coreFeelingTitles.includes(data.titel)) {
+                    impulsTitle = "Wie Kinder dieses Gefühl erleben";
+                    aktionTitle = "Pädagogische Anregungen";
+                 }
+                 htmlContent = `
+                    <div>
+                        <h3 class="text-2xl md:text-3xl font-bold ${data.farbe} mb-1">Woche ${data.woche}: ${data.titel}</h3>
+                        <div class="flex items-center space-x-4 mb-6"><span class="w-4 h-4 ${data.bgColor} rounded-full"></span><span class="text-gray-500">Thema dieser Woche</span></div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-white/50 p-4 rounded-lg"><h4 class="font-bold text-lg mb-2 text-gray-800">${impulsTitle}</h4><p>${data.impuls}</p></div>
+                            <div class="bg-white/50 p-4 rounded-lg"><h4 class="font-bold text-lg mb-2 text-gray-800">${aktionTitle}</h4><p>${data.aktion}</p></div>
+                        </div>
+                    </div>`;
             }
 
-            contentContainer.innerHTML = `
-                <div>
-                    <h3 class="text-2xl md:text-3xl font-bold ${data.farbe} mb-1">Woche ${data.woche}: ${data.titel}</h3>
-                    <div class="flex items-center space-x-4 mb-6">
-                        <span class="w-4 h-4 ${data.bgColor} rounded-full"></span>
-                        <span class="text-gray-500">Thema dieser Woche</span>
-                    </div>
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="bg-white/50 p-4 rounded-lg">
-                            <h4 class="font-bold text-lg mb-2 text-gray-800">${impulsTitle}</h4>
-                            <p>${data.impuls}</p>
-                        </div>
-                        <div class="bg-white/50 p-4 rounded-lg">
-                            <h4 class="font-bold text-lg mb-2 text-gray-800">${aktionTitle}</h4>
-                            <p>${data.aktion}</p>
-                        </div>
-                    </div>
-                </div>
-            `;
+            contentContainer.innerHTML = htmlContent;
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            updateTimelineState(parseInt(weekId));
+            if(projectType === 'gefuehle') updateTimelineState(parseInt(dataId));
         }
         
         function closeDetailModal() {
@@ -219,129 +310,206 @@
         }
 
         function updateTimelineState(activeWeekId) {
-            document.querySelectorAll('.timeline-item').forEach(item => {
-                const data = projectData.find(d => d.id === parseInt(item.dataset.weekId));
+            document.querySelectorAll('#gefuehle-projekt .timeline-item').forEach(item => {
+                const weekId = parseInt(item.dataset.weekId);
+                const data = projectDataGefuehle.find(d => d.id === weekId);
+                if (!data) return;
+                
                 item.classList.remove('active', 'border-4', data.borderColor);
-                 if (parseInt(item.dataset.weekId) === activeWeekId) {
+                 if (weekId === activeWeekId) {
                     item.classList.add('active', 'border-4', data.borderColor);
                  }
             });
         }
         
-        function initializeApp() {
-            const coreFeelingTitles = ["Freude", "Traurigkeit", "Wut", "Angst", "Überraschung", "Stolz & Mut", "Neugier", "Schüchternheit"];
-            const coreFeelings = projectData.filter(item => coreFeelingTitles.includes(item.titel));
-            const otherPhases = projectData.filter(item => !coreFeelingTitles.includes(item.titel));
+        function initGefuehleProject() {
+            const projectContainer = document.getElementById('gefuehle-projekt');
+            const emotionSelector = projectContainer.querySelector('#emotion-selector');
+            const otherPhasesSelector = projectContainer.querySelector('#other-phases-selector');
+            const timelineContainer = projectContainer.querySelector('.timeline-container');
             
-            emotionSelector.innerHTML = coreFeelings.map(data => `
-                <button data-week-id="${data.id}" class="week-selector-btn emotion-card group ${data.bgColor} p-4 rounded-xl text-center font-bold ${data.farbe} cursor-pointer flex flex-col items-center justify-center h-40 overflow-hidden">
-                    <div class="transition-transform duration-300 ease-in-out group-hover:-translate-y-3">
-                        <span class="text-xl">${data.titel}</span>
-                    </div>
-                    <div class="text-xs font-normal mt-2 px-2 opacity-0 max-h-0 group-hover:opacity-100 group-hover:max-h-full transition-all duration-300 ease-in-out text-gray-600">
-                        <p>${data.previewText}</p>
-                    </div>
+            const coreFeelingTitles = ["Freude", "Traurigkeit", "Wut", "Angst", "Überraschung", "Stolz & Mut", "Neugier", "Schüchternheit"];
+            const coreFeelings = projectDataGefuehle.filter(item => coreFeelingTitles.includes(item.titel));
+            const otherPhases = projectDataGefuehle.filter(item => !coreFeelingTitles.includes(item.titel));
+            
+            emotionSelector.innerHTML = coreFeelings.map(data => `<button data-week-id="${data.id}" class="week-selector-btn emotion-card group ${data.bgColor} p-4 rounded-xl text-center font-bold ${data.farbe} cursor-pointer flex flex-col items-center justify-center h-40 overflow-hidden"><div class="transition-transform duration-300 ease-in-out group-hover:-translate-y-3"><span class="text-xl">${data.titel}</span></div><div class="text-xs font-normal mt-2 px-2 opacity-0 max-h-0 group-hover:opacity-100 group-hover:max-h-full transition-all duration-300 ease-in-out text-gray-600"><p>${data.previewText}</p></div></button>`).join('');
+            otherPhasesSelector.innerHTML = otherPhases.map(data => `<button data-week-id="${data.id}" class="week-selector-btn other-phase-card bg-white/70 hover:bg-white text-gray-700 py-2 px-4 rounded-lg text-center font-semibold cursor-pointer border border-gray-200/80"><span>${data.titel}</span></button>`).join('');
+            timelineContainer.innerHTML = projectDataGefuehle.map(data => `<div data-week-id="${data.id}" class="timeline-item week-selector-btn cursor-pointer flex-shrink-0 w-28 text-center p-3 rounded-xl bg-white/60 backdrop-blur-sm shadow-sm"><div class="font-bold text-sm text-gray-600">${data.woche}</div><div class="text-xs text-gray-600 mt-1">${data.titel}</div></div>`).join('');
+
+            projectContainer.querySelectorAll('.week-selector-btn').forEach(card => card.addEventListener('click', () => openDetailModal(card.dataset.weekId, 'gefuehle')));
+        }
+        
+        function initStuttgartProject() {
+            const projectContainer = document.getElementById('stuttgart-projekt');
+            const themenSelector = projectContainer.querySelector('#stuttgart-themen-selector');
+            const categories = ['Alle', ...new Set(stuttgartThemes.map(loc => loc.category))];
+
+            themenSelector.innerHTML = categories.map(cat => `
+                <button data-category="${cat}" class="theme-card bg-white/70 hover:bg-white text-gray-800 py-2 px-5 rounded-lg text-center font-semibold cursor-pointer border-2 border-transparent">
+                    ${cat}
                 </button>
             `).join('');
 
-            otherPhasesSelector.innerHTML = otherPhases.map(data => `
-                <button data-week-id="${data.id}" class="week-selector-btn other-phase-card bg-white/70 hover:bg-white text-gray-700 py-2 px-4 rounded-lg text-center font-semibold cursor-pointer border border-gray-200/80">
-                    <span>${data.titel}</span>
-                </button>
-            `).join('');
+            themenSelector.querySelectorAll('.theme-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    const selectedCategory = e.currentTarget.dataset.category;
+                    themenSelector.querySelectorAll('.theme-card').forEach(btn => btn.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                    renderStuttgartThemes(selectedCategory);
+                });
+            });
             
-            timelineContainer.innerHTML = projectData.map(data => `
-                <div data-week-id="${data.id}" class="timeline-item week-selector-btn cursor-pointer flex-shrink-0 w-28 text-center p-3 rounded-xl bg-white/60 backdrop-blur-sm shadow-sm">
-                     <div class="font-bold text-sm" style="color: ${ci.grey}">${data.woche}</div>
-                     <div class="text-xs text-gray-600 mt-1">${data.titel}</div>
+            renderStuttgartThemes('Alle'); // Initial render
+            themenSelector.querySelector('.theme-card[data-category="Alle"]').classList.add('active');
+        }
+
+        function renderStuttgartThemes(category) {
+            const orteGrid = document.getElementById('stuttgart-orte-grid');
+            const themesToShow = category === 'Alle' 
+                ? stuttgartThemes 
+                : stuttgartThemes.filter(loc => loc.category === category);
+
+            orteGrid.innerHTML = themesToShow.map(loc => `
+                <div class="stuttgart-card bg-white/80 p-5 rounded-xl flex flex-col items-center text-center shadow-md">
+                    ${loc.icon}
+                    <h3 class="font-bold text-lg mt-3 mb-1 text-gray-800">${loc.title}</h3>
+                    <p class="text-sm text-gray-600 flex-grow">${loc.info}</p>
+                    <button data-theme-id="${loc.id}" class="stuttgart-detail-btn mt-4 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-full text-sm transition-colors">
+                        Aktionsideen
+                    </button>
                 </div>
             `).join('');
 
-            document.querySelectorAll('.week-selector-btn').forEach(card => {
-                card.addEventListener('click', () => openDetailModal(card.dataset.weekId));
-            });
-            
-            closeModalButton.addEventListener('click', closeDetailModal);
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    closeDetailModal();
-                }
-            });
-
-            exploreButton.addEventListener('click', () => {
-                startView.classList.add('hidden');
-                mainContent.classList.remove('opacity-0');
-                mainContent.style.paddingTop = '2rem'; 
-
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            entry.target.classList.add('is-visible');
-                        }
-                    });
-                }, { threshold: 0.1 });
-
-                document.querySelectorAll('.fade-in-on-scroll').forEach(el => {
-                    observer.observe(el);
+            document.querySelectorAll('.stuttgart-detail-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    openDetailModal(e.currentTarget.dataset.themeId, 'stuttgart');
                 });
-            });
-
-            // Adjust Timeline text colors to CD
-            document.querySelectorAll('.timeline-item').forEach(item => {
-                const weekId = item.dataset.weekId;
-                const data = projectData.find(d => d.id == weekId);
-                const titleEl = item.querySelector('.font-bold');
-                if (data && titleEl) {
-                    if (data.titel === "Wut" || data.titel === "Schüchternheit") {
-                        titleEl.style.color = ci.magenta;
-                    } else if (data.titel === "Freude" || data.titel === "Stolz & Mut" || data.titel === "Abschluss") {
-                         titleEl.style.color = ci.ochre;
-                    } else {
-                         titleEl.style.color = ci.grey;
-                    }
-                }
-            });
-
-            // Haiku Cycle
-            const haikus = [
-                "Sonne lacht im Herz,<br>leichtes Kichern, bunter Tanz,<br>Glück im Augenblick.", // Freude
-                "Stiller Regen fällt,<br>schwere Tropfen auf der Haut,<br>bald scheint Licht hindurch.", // Traurigkeit
-                "Heißer Sturm im Bauch,<br>stampfender Fuß, lauter Schrei,<br>braucht nun sanften Wind.", // Wut
-                "Schatten an der Wand,<br>Herz klopft schnell, der Atem stockt,<br>sucht die sich're Hand.", // Angst
-                "Turm steht hoch und fest,<br>ich hab's geschafft, ganz allein,<br>Krone auf dem Haupt.", // Stolz
-                "Was ist dahinter?<br>Neue Welten, off'ne Tür,<br>Fragen ohne End'.", // Neugier
-                "Leises Flüstern nur,<br>rote Wangen, Blick gesenkt,<br>stiller Beobachter." // Schüchternheit
-            ];
-            let haikuIndex = 0;
-
-            function cycleHaikus() {
-                haikuContainer.classList.add('opacity-0'); 
-                setTimeout(() => {
-                    haikuIndex = (haikuIndex + 1) % haikus.length;
-                    haikuContainer.innerHTML = haikus[haikuIndex];
-                    haikuContainer.classList.remove('opacity-0'); 
-                }, 1000); 
-            }
-
-            setTimeout(() => {
-                haikuContainer.innerHTML = haikus[haikuIndex];
-                haikuContainer.classList.remove('opacity-0');
-                setInterval(cycleHaikus, 5000); 
-            }, 500);
-
-            // Adjust goals colors
-             document.querySelectorAll('#goals-grid strong').forEach((el, index) => {
-                if (index % 2 === 0) {
-                     el.style.color = ci.magenta;
-                } else {
-                     el.style.color = ci.ochre;
-                }
             });
         }
 
-        initializeApp();
+        function loadProject(projectName) {
+            startView.classList.add('hidden');
+            mainContent.classList.remove('opacity-0');
+            document.body.className = 'text-gray-700';
+            document.body.classList.add(`theme-${projectName}`);
+            document.getElementById('gefuehle-projekt').classList.add('hidden');
+            document.getElementById('stuttgart-projekt').classList.add('hidden');
+            document.getElementById(`${projectName}-projekt`).classList.remove('hidden');
 
+            if (projectName === 'gefuehle') {
+                initGefuehleProject();
+            } else if (projectName === 'stuttgart') {
+                initStuttgartProject();
+            }
+            
+            const observer = new IntersectionObserver((entries) => entries.forEach(entry => entry.isIntersecting && entry.target.classList.add('is-visible')), { threshold: 0.1 });
+            document.querySelectorAll('.fade-in-on-scroll').forEach(el => observer.observe(el));
+        }
+
+        document.getElementById('back-to-selection').addEventListener('click', () => {
+            mainContent.classList.add('opacity-0');
+            setTimeout(() => {
+                startView.classList.remove('hidden');
+                document.body.className = 'text-gray-700';
+                showProject(currentProjectIndex);
+            }, 500);
+        });
+
+        closeModalButton.addEventListener('click', closeDetailModal);
+        modal.addEventListener('click', (e) => e.target === modal && closeDetailModal());
+
+        const carouselProjects = [
+            { 
+                id: 'gefuehle', 
+                title: 'Unsere Gefühle', 
+                description: 'Ein interaktiver Leitfaden zur emotionalen Entwicklung.', 
+                theme: 'theme-gefuehle', 
+                buttonColor: 'bg-[#C70077]',
+                dynamicTexts: [
+                    `Sonne lacht im Herz,<br>leichtes Kichern, bunter Tanz,<br>Glück im Augenblick.`, // Freude
+                    `Stiller Regen fällt,<br>schwere Tropfen auf der Haut,<br>bald scheint Licht hindurch.`, // Traurigkeit
+                    `Heißer Sturm im Bauch,<br>stampfender Fuß, lauter Schrei,<br>braucht nun sanften Wind.`, // Wut
+                    `Schatten an der Wand,<br>Herz klopft schnell, der Atem stockt,<br>sucht die sich're Hand.` // Angst
+                ]
+            },
+            { 
+                id: 'stuttgart', 
+                title: 'Meine Stadt Stuttgart', 
+                description: 'Stuttgart mit Kinderaugen neu entdecken.', 
+                theme: 'theme-stuttgart', 
+                buttonColor: 'bg-yellow-500',
+                dynamicTexts: [
+                    `"Stuttgart ist ein Paradies."<br>- Friedrich Schiller`,
+                    `"Stuttgart scheint mir diejenige zu seyn, in welcher das geselligste Leben herrscht."<br>- Wilhelm Hauff`,
+                    `"Stuttgart ist nicht eine Stadt wie jede andere, sondern ein Gedanke, eine Idee, ein Modell."<br>- Theodor Heuss`
+                ]
+            }
+        ];
+        
+        let currentProjectIndex = 0;
+        let textCycleInterval = null;
+        const prevBtn = document.getElementById('prev-project');
+        const nextBtn = document.getElementById('next-project');
+        const exploreBtn = document.getElementById('explore-button');
+        const carouselContentContainer = document.getElementById('carousel-content-container');
+
+        function showProject(index) {
+            const project = carouselProjects[index];
+            carouselContentContainer.classList.add('exit');
+            
+            clearInterval(textCycleInterval);
+
+            setTimeout(() => {
+                carouselContentContainer.innerHTML = `
+                    <h1 class="text-4xl sm:text-5xl font-bold" style="font-family: 'Kumbh Sans', sans-serif;">${project.title}</h1>
+                    <p class="mt-4 text-lg sm:text-xl text-white/90 max-w-2xl mx-auto">${project.description}</p>
+                    <div id="carousel-dynamic-text" class="mt-4 text-white/80 italic"></div>
+                `;
+
+                const dynamicTextContainer = document.getElementById('carousel-dynamic-text');
+                if (project.dynamicTexts && project.dynamicTexts.length > 0) {
+                    let textIndex = 0;
+                    dynamicTextContainer.innerHTML = project.dynamicTexts[textIndex];
+                    
+                    textCycleInterval = setInterval(() => {
+                        dynamicTextContainer.style.opacity = 0;
+                        setTimeout(() => {
+                            textIndex = (textIndex + 1) % project.dynamicTexts.length;
+                            dynamicTextContainer.innerHTML = project.dynamicTexts[textIndex];
+                            dynamicTextContainer.style.opacity = 1;
+                        }, 700);
+                    }, 5000);
+                }
+
+                startView.classList.remove('theme-gefuehle', 'theme-stuttgart');
+                startView.classList.add(project.theme);
+                exploreBtn.classList.remove('bg-[#C70077]', 'bg-yellow-500');
+                exploreBtn.classList.add(project.buttonColor);
+                carouselContentContainer.classList.remove('exit');
+                carouselContentContainer.classList.add('enter');
+                setTimeout(() => carouselContentContainer.classList.remove('enter'), 20);
+            }, 400);
+        }
+
+        prevBtn.addEventListener('click', () => {
+            currentProjectIndex = (currentProjectIndex - 1 + carouselProjects.length) % carouselProjects.length;
+            showProject(currentProjectIndex);
+        });
+        nextBtn.addEventListener('click', () => {
+            currentProjectIndex = (currentProjectIndex + 1) % carouselProjects.length;
+            showProject(currentProjectIndex);
+        });
+        exploreBtn.addEventListener('click', () => {
+            clearInterval(textCycleInterval);
+            loadProject(carouselProjects[currentProjectIndex].id)
+        });
+        
+        showProject(currentProjectIndex);
     </script>
+</body>
+</html>
+
+
 </body>
 </html>
 
